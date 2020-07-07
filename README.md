@@ -20,7 +20,7 @@ Your mapping file is relative to your `<widget />` element in your config.xml fi
 
 ### Attributes
 Define properties starting with @ to set attribute values. e.g
-```
+```json
 {
     "@id": "io.helloworld.cordovadev"
 }
@@ -30,14 +30,14 @@ will update the `<widget id="" />` attribute to io.helloworld.cordovadev
 ### String Values
 To update a nodes inner text like `<name>App Name</name>` 
 Specify a string value 
-```
+```json
 {
     "name": "Hello World DEV"
 }
 ```
 
 or use the special object property `_` to match the current node.
-```
+```json
 {
     "author": [
         {
@@ -52,7 +52,7 @@ or use the special object property `_` to match the current node.
 ### Filtering
 You can filter arrays using node attributes using `[attribute=value]` syntax.
 
-```
+```json
 {
     "plugin": {
         "[name=cordova-plugin-facebook4]": {
