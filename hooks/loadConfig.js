@@ -21,7 +21,7 @@ module.exports = async ctx => {
         return;
     }
 
-    const attrSearch = /^\[([^=]+)=([^\]]*)]$/;
+    const attrSearch = /^([^\[]+)\[([^=]+)=([^\]]*)]$/;
     const override = (node, overrides) => {
 
         for (let i of Object.keys(overrides)) {
@@ -32,16 +32,17 @@ module.exports = async ctx => {
                 node.$ = node.$ || {};
                 node.$[i.substring(1)] = value;
             } else if (matches != null) {
-                const attribute = matches[1];
-                const searchTerm = matches[2];
-                node = node || [];
-                let existing = node.find(n => n.$ && n.$[attribute] == searchTerm);
+                const key = matches[1];
+                const attribute = matches[2];
+                const searchTerm = matches[3];
+                node[key] = node[key] || [];
+                let existing = node[key].find(n => n.$ && n.$[attribute] == searchTerm);
                 if (existing == null) {
                     existing = {
                         $: {}
                     };
                     existing.$[attribute] = searchTerm;
-                    node.push(existing);
+                    node[key].push(existing);
                 }
                 override(existing, value);
             } else if (i === "_") {
@@ -50,9 +51,17 @@ module.exports = async ctx => {
                 node[i] = node[i] || [];
 
                 if (typeof (value) === 'string') {
-                    node[i][0] = value;
+                    for (var j of Object.keys(node[i])) {
+                        node[i][j] = value;
+                    }
                 } else if (typeof (value) === 'object') {
-                    override(node[i], value);
+                    if (node[i] instanceof Array) {
+                        for (var j = 0; j < node[i].length; ++j) {
+                            override(node[i][j], value);
+                        }
+                    } else {
+                        override(node[i], value);
+                    }
                 }
             }
         }
@@ -71,37 +80,37 @@ module.exports = async ctx => {
 
     // Special consideration required for plugin override variables.
     // package.json directives take precedence over config.xml values
-    if(overrides.plugin) {
-        // If a package.json file exists
-        if(fs.existsSync("package.json")) {
-            // Update the plugin variables if present
-            const packageJson = JSON.parse(fs.readFileSync("package.json"));
-            if(packageJson.cordova && packageJson.cordova.plugins) {
-                let count = 0;
-                for(const i of Object.keys(overrides.plugin)) {
-                    const matches = attrSearch.exec(i);
-                    if(matches == null) continue;
+    // If a package.json file exists
+    if (fs.existsSync("package.json")) {
+        const packageJson = JSON.parse(fs.readFileSync("package.json"));
+        if (packageJson && packageJson.cordova && packageJson.cordova.plugins) {
+            let count = 0;
 
-                    const override = overrides.plugin[i];
-                    const plugin = packageJson.cordova.plugins[matches[2]];
-                    if(!override.variable || !plugin) continue;
+            for (const i of Object.keys(overrides)) {
+                const matches = attrSearch.exec(i);
+                if (!matches) continue;
 
-                    for(const j of Object.keys(override.variable)) {
-                        const variableMatches = attrSearch.exec(j);
-                        if(variableMatches == null) continue;
+                const key = matches[1];
+                if (key != "plugin") continue;
 
-                        const variableName = variableMatches[2];
-                        const value = override.variable[j]["@value"];
-                        plugin[variableName] = value;
-                        ++count;
-                    }
+                const name = matches[3];
+                const plugin = packageJson.cordova.plugins[name];
+                if (!plugin) continue;
+
+                for (const j of Object.keys(overrides[i])) {
+                    const varMatch = attrSearch.exec(j);
+                    if (!varMatch) continue;
+                    const variableName = varMatch[3];
+                    const value = overrides[i][j]["@value"];
+                    plugin[variableName] = value;
+                    ++count;
                 }
+            }
 
-                // Write back package.json
-                if(count > 0) {
-                    fs.writeFileSync("package.json", JSON.stringify(packageJson, null, 2));
-                    console.log(`Updated ${count} variables in package.json`);
-                }
+            // Write back package.json
+            if (count > 0) {
+                fs.writeFileSync("package.json", JSON.stringify(packageJson, null, 2));
+                console.log(`Updated ${count} variables in package.json`);
             }
         }
     }

@@ -39,13 +39,11 @@ Specify a string value
 or use the special object property `_` to match the current node.
 ```json
 {
-    "author": [
-        {
-            "@email": "trent@somedomain.com",
-            "@href": "http://somedomain.com",
-            "_": "Trent Gardner"
-        }
-    ]
+    "author": {
+        "@email": "trent@somedomain.com",
+        "@href": "http://somedomain.com",
+        "_": "Trent Gardner"
+    }
 }
 ```
 
@@ -54,16 +52,12 @@ You can filter arrays using node attributes using `[attribute=value]` syntax.
 
 ```json
 {
-    "plugin": {
-        "[name=cordova-plugin-facebook4]": {
-            "variable": {
-                "[name=APP_ID]": {
-                    "@value": "MY_FACEBOOK_APP_ID"
-                },
-                "[name=APP_NAME]": {
-                    "@value": "MY_FACEBOOK_APP_NAME"
-                }
-            }
+    "plugin[name=cordova-plugin-facebook4]": {
+        "variable[name=APP_ID]": {
+            "@value": "MY_FACEBOOK_APP_ID"
+        },
+        "variable[name=APP_NAME]": {
+            "@value": "MY_FACEBOOK_APP_NAME"
         }
     }
 }
@@ -76,23 +70,17 @@ Will only match the plugin cordova-plugin-facebook4 and update the variable valu
     "@id": "io.helloworld.cordovadev",
     "name": "Hello World DEV",
     "description": "Hello World",
-    "author": [
-        {
-            "@email": "trent@somedomain.com",
-            "@href": "http://somedomain.com",
-            "_": "Trent Gardner"
-        }
-    ],
-    "plugin": {
-        "[name=cordova-plugin-facebook4]": {
-            "variable": {
-                "[name=APP_ID]": {
-                    "@value": "MY_FACEBOOK_APP_ID"
-                },
-                "[name=APP_NAME]": {
-                    "@value": "MY_FACEBOOK_APP_NAME"
-                }
-            }
+    "author": {
+        "@email": "trent@somedomain.com",
+        "@href": "http://somedomain.com",
+        "_": "Trent Gardner"
+    },
+    "plugin[name=cordova-plugin-facebook4]": {
+        "variable[name=APP_ID]": {
+            "@value": "MY_FACEBOOK_APP_ID"
+        },
+        "variable[name=APP_NAME]": {
+            "@value": "MY_FACEBOOK_APP_NAME"
         }
     }
 }
